@@ -1,6 +1,6 @@
 import { ArrayBufferView, RawMessage, Data } from './types'
 
-const isRawMessage = (data: Data | RawMessage) => {
+const isRawMessage = (data: Data | RawMessage): data is RawMessage => {
   return typeof data === 'string' || data instanceof ArrayBuffer || data instanceof ArrayBufferView
 }
 

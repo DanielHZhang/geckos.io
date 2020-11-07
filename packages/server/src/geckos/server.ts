@@ -1,35 +1,38 @@
-import bridge from '@geckos.io/common/lib/bridge'
-import http from 'http'
-import ServerChannel from './channel'
-import { EVENTS } from '@geckos.io/common/lib/constants'
-import * as Types from '@geckos.io/common/lib/types'
+import bridge from '@rtcweb/common/lib/bridge';
+import http from 'http';
+import ServerChannel from './channel';
+import {EVENTS} from '@rtcweb/common/lib/constants';
+import * as Types from '@rtcweb/common/lib/types';
 
-import { makeReliable } from '@geckos.io/common/lib/reliableMessage'
-import Connection from '../wrtc/connection'
-import ConnectionsManagerServer from '../wrtc/connectionsManager'
-import HttpServer from '../httpServer/httpServer'
-import WebRTCConnection from '../wrtc/webrtcConnection'
+import {makeReliable} from '@rtcweb/common/lib/reliableMessage';
+import Connection from '../wrtc/connection';
+import ConnectionsManagerServer from '../wrtc/connectionsManager';
+import HttpServer from '../httpServer/httpServer';
+import WebRTCConnection from '../wrtc/webrtcConnection';
 
 export class GeckosServer {
-  private _port: number
-  private _cors: Types.CorsOptions = { origin: '*', allowAuthorization: false }
-  public connectionsManager: ConnectionsManagerServer
-  public server: http.Server
+  private _port: number;
+  private _cors: Types.CorsOptions = {origin: '*', allowAuthorization: false};
+  public connectionsManager: ConnectionsManagerServer;
+  public server: http.Server;
 
   constructor(options: Types.ServerOptions) {
-    this.connectionsManager = new ConnectionsManagerServer(options)
+    this.connectionsManager = new ConnectionsManagerServer(options);
 
     // auto adjust allow authorization in cors headers
-    if (typeof options.cors?.allowAuthorization === 'undefined' && typeof options.authorization === 'function')
-      this._cors.allowAuthorization = true
+    if (
+      typeof options.cors?.allowAuthorization === 'undefined' &&
+      typeof options.authorization === 'function'
+    )
+      this._cors.allowAuthorization = true;
 
     // merge cors options
-    this._cors = { ...this._cors, ...options.cors }
+    this._cors = {...this._cors, ...options.cors};
   }
 
   // @ts-ignore
   private get connections() {
-    return this.connectionsManager.connections
+    return this.connectionsManager.connections;
   }
 
   /**
@@ -37,24 +40,24 @@ export class GeckosServer {
    * @param port Default port is 9208.
    */
   listen(port: number = 9208) {
-    this._port = port
+    this._port = port;
 
     // create the server
-    this.server = http.createServer()
+    this.server = http.createServer();
 
     // on server close event
     this.server.once('close', () => {
-      this.connectionsManager.connections.forEach((connection: Connection) => connection.close())
-      bridge.removeAllListeners()
-    })
+      this.connectionsManager.connections.forEach((connection: Connection) => connection.close());
+      bridge.removeAllListeners();
+    });
 
     // add all routes
-    HttpServer(this.server, this.connectionsManager, this._cors)
+    HttpServer(this.server, this.connectionsManager, this._cors);
 
     // start the server
     this.server.listen(port, () => {
-      console.log(`Geckos.io signaling server is running on http://localhost:${port}`)
-    })
+      console.log(`Geckos.io signaling server is running on http://localhost:${port}`);
+    });
   }
 
   /**
@@ -62,19 +65,19 @@ export class GeckosServer {
    * @param server Your http.Server.
    */
   public addServer(server: http.Server) {
-    this.server = server
+    this.server = server;
 
-    HttpServer(this.server, this.connectionsManager, this._cors)
+    HttpServer(this.server, this.connectionsManager, this._cors);
 
     // on server close event
     this.server.once('close', () => {
-      this.connectionsManager.connections.forEach((connection: Connection) => connection.close())
-      bridge.removeAllListeners()
-    })
+      this.connectionsManager.connections.forEach((connection: Connection) => connection.close());
+      bridge.removeAllListeners();
+    });
   }
 
   get port() {
-    return this._port
+    return this._port;
   }
 
   /**
@@ -85,18 +88,18 @@ export class GeckosServer {
    */
   emit(eventName: Types.EventName, data: Types.Data, options?: Types.EmitOptions) {
     this.connections.forEach((connection: WebRTCConnection) => {
-      const { channel } = connection
+      const {channel} = connection;
 
       if (options && options.reliable) {
         makeReliable(options, (id: string) =>
           channel.emit(eventName, {
             MESSAGE: data,
             RELIABLE: 1,
-            ID: id
+            ID: id,
           })
-        )
-      } else channel.emit(eventName, data)
-    })
+        );
+      } else channel.emit(eventName, data);
+    });
   }
 
   /**
@@ -107,15 +110,15 @@ export class GeckosServer {
     return {
       emit: (eventName: Types.EventName, data: Types.Data) => {
         this.connections.forEach((connection: WebRTCConnection) => {
-          const { channel } = connection
-          const { roomId: channelRoomId } = channel
+          const {channel} = connection;
+          const {roomId: channelRoomId} = channel;
 
           if (roomId === channelRoomId) {
-            channel.emit(eventName, data)
+            channel.emit(eventName, data);
           }
-        })
-      }
-    }
+        });
+      },
+    };
   }
 
   /** Emit a raw message */
@@ -125,19 +128,19 @@ export class GeckosServer {
       room: (roomId: Types.RoomId = undefined) => {
         return {
           emit: (rawMessage: Types.RawMessage) => {
-            this.room(roomId).emit(EVENTS.RAW_MESSAGE, rawMessage)
-          }
-        }
-      }
-    }
+            this.room(roomId).emit(EVENTS.RAW_MESSAGE, rawMessage);
+          },
+        };
+      },
+    };
   }
 
   /** Listen for a new connection. */
   onConnection(callback: (channel: ServerChannel) => void) {
     bridge.on(EVENTS.CONNECTION, (channel: ServerChannel) => {
-      let cb: (channel: ServerChannel) => void = channel => callback(channel)
-      cb(channel)
-    })
+      let cb: (channel: ServerChannel) => void = (channel) => callback(channel);
+      cb(channel);
+    });
   }
 
   // /**
@@ -172,15 +175,15 @@ export class GeckosServer {
  * @param options.authorization The async authorization callback
  */
 const geckosServer = (options: Types.ServerOptions = {}) => {
-  const { iceTransportPolicy } = options
+  const {iceTransportPolicy} = options;
 
   if (iceTransportPolicy === 'relay') {
-    console.error(`WARNING: iceTransportPolicy "relay" does not work yet on the server!`)
-    options.iceTransportPolicy = 'all'
+    console.error(`WARNING: iceTransportPolicy "relay" does not work yet on the server!`);
+    options.iceTransportPolicy = 'all';
   }
 
-  return new GeckosServer(options)
-}
+  return new GeckosServer(options);
+};
 
-export default geckosServer
-export { ServerChannel }
+export default geckosServer;
+export {ServerChannel};

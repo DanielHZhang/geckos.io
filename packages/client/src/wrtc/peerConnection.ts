@@ -1,36 +1,42 @@
-import ConnectionsManagerClient from './connectionsManager'
-import { ERRORS } from '@geckos.io/common/lib/constants'
-import { ChannelId } from '@geckos.io/common/lib/types'
+import ConnectionsManagerClient from './connectionsManager';
+import {ERRORS} from '@rtcweb/common/lib/constants';
+import {ChannelId} from '@rtcweb/common/lib/types';
 
 export default class PeerConnection {
-  localPeerConnection: RTCPeerConnection
-  dataChannel: RTCDataChannel
-  id: ChannelId
+  localPeerConnection: RTCPeerConnection;
+  dataChannel: RTCDataChannel;
+  id: ChannelId;
 
   async connect(connectionsManager: ConnectionsManagerClient) {
     let webRTCPcSupported =
       RTCPeerConnection ||
       webkitRTCPeerConnection ||
       // @ts-ignore
-      mozRTCPeerConnection
+      mozRTCPeerConnection;
 
     if (webRTCPcSupported) {
-      const { localPeerConnection, dataChannel, id, userData, error } = await connectionsManager.connect()
+      const {
+        localPeerConnection,
+        dataChannel,
+        id,
+        userData,
+        error,
+      } = await connectionsManager.connect();
 
-      if (error) return { error }
+      if (error) return {error};
 
       if (!localPeerConnection || !dataChannel || !id || !userData)
-        return { error: new Error('Something went wrong in "await connectionsManager.connect()"') }
+        return {error: new Error('Something went wrong in "await connectionsManager.connect()"')};
 
-      this.localPeerConnection = localPeerConnection
-      this.dataChannel = dataChannel
-      this.id = id
+      this.localPeerConnection = localPeerConnection;
+      this.dataChannel = dataChannel;
+      this.id = id;
 
-      return { userData }
+      return {userData};
     } else {
-      let error = new Error(ERRORS.BROWSER_NOT_SUPPORTED)
-      console.error(error.message)
-      return { error }
+      let error = new Error(ERRORS.BROWSER_NOT_SUPPORTED);
+      console.error(error.message);
+      return {error};
     }
   }
 }

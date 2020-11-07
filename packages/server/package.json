@@ -1,5 +1,5 @@
 {
-  "name": "@geckos.io/server",
+  "name": "@rtcweb/server",
   "version": "1.7.0",
   "description": "Real-time client/server communication over UDP using WebRTC and Node.js",
   "main": "lib/index.js",
@@ -41,9 +41,9 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@geckos.io/common": "^1.7.0",
+    "@rtcweb/common": "^1.7.0",
     "eventemitter3": "^4.0.0",
-    "wrtc": "^0.4.6"
+    "werift": "^0.0.30"
   },
   "devDependencies": {
     "@types/node": "^12.12.50"

@@ -1,12 +1,12 @@
 {
-  "name": "@geckos.io/common",
+  "name": "@rtcweb/common",
   "version": "1.7.0",
-  "description": "The common module for @geckos.io/server and @geckos.io/client.",
+  "description": "The common module for @rtcweb/server and @rtcweb/client.",
   "main": "lib",
   "author": "Yannick Deubel (https://github.com/yandeu)",
   "license": "BSD-3-Clause",
   "keywords": [
-    "@geckos.io"
+    "@rtcweb"
   ],
   "repository": {
     "type": "git",
@@ -25,7 +25,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "eventemitter3": "^4.0.4"
+    "eventemitter3": "^4.0.4",
+    "werift": "^0.0.30"
   },
   "funding": {
     "url": "https://github.com/sponsors/yandeu"

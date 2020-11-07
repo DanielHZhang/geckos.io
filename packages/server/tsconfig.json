@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs",
-    "lib": ["dom", "esnext"],
+    "lib": [
+      "dom",
+      "esnext"
+    ],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./lib",
     "rootDir": "./src",
+    "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
